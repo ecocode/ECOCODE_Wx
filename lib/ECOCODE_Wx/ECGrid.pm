@@ -1,4 +1,4 @@
-package ECOCODE::ECGrid;
+package ECOCODE_Wx::ECGrid;
 
 use feature "switch";
 

@@ -1,4 +1,4 @@
-package ECOCODE::ECFrame;
+package ECOCODE_Wx::ECFrame;
 
 use strict;
 use warnings;

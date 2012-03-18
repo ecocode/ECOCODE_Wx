@@ -1,4 +1,4 @@
-package ECOCODE::ECDialog;
+package ECOCODE_Wx::ECDialog;
 
 use Modern::Perl;
 

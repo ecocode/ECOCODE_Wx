@@ -1,4 +1,4 @@
-package ECOCODE::ECMessageDialog;
+package ECOCODE_Wx::ECMessageDialog;
 
 use strict;
 use warnings;
