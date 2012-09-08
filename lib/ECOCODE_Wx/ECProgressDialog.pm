@@ -68,6 +68,7 @@ sub FOREIGNBUILDARGS {
         exists $args{title} ? $args{title} : _TITLE;
     my $style   = exists $args{style}   ? $args{style}   : undef;
     my $message = exists $args{message} ? $args{message} : _MESSAGE;
+    my $maximum = $args{maximum} // undef;
     return ( $title, $message, $maximum, $parent, $style );
 }
 
