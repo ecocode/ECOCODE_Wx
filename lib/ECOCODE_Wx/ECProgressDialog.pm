@@ -21,10 +21,14 @@ package ECOCODE_Wx::ECProgressDialog;
 
     usleep (500000); # Do some stuff
 
-    foreach (1..100) {
-        $progressBar->setValue($_);
+    foreach (1..99) {
+        $progressBar->setValue($_); # setValue to value equal
+                                    # as maximum will dismiss
+                                    # the ProgressDialog
         usleep (100000); # Do some more stuff
     }
+
+    $progressBar->close(); # dismiss
 
 =head1 DESCRIPTION
 
@@ -68,16 +72,24 @@ use Log::Log4perl;
 extends 'Wx::ProgressDialog';
 use Wx qw( wxPD_AUTO_HIDE wxPD_APP_MODAL );
 
+use constant _TITLE => '--- ECOCODE_Wx Progress Dialog ---' ;
+use constant _MESSAGE => 'Progress' ;
+use constant _MAXIMUM => 100 ;
+
 has 'abort'     => ( is => 'rw', isa => 'Bool', default => 0 );
+has 'value' => ( is => 'rw', isa => 'Num', default => 0, );
+has 'maximum' => ( is => 'ro', isa => 'Num', default => _MAXIMUM, );
+has 'message' => ( is => 'rw', isa => 'Str', default => _MESSAGE, );
+has 'title' => ( is => 'ro', isa => 'Str', default => _TITLE, );
 
 sub FOREIGNBUILDARGS {
     my $class  = shift;
     my %args   = @_;
     my $parent = $args{parent} // undef;
-    my $title = $args{title} // '--- ECOCODE_Wx Progress Dialog ---' ;
+    my $title = $args{title} // _TITLE ;
     my $style   = $args{style} // (wxPD_AUTO_HIDE | wxPD_APP_MODAL);
-    my $message = $args{message} // 'Progress';
-    my $maximum = $args{maximum} // 100;
+    my $message = $args{message} // _MESSAGE;
+    my $maximum = $args{maximum} // _MAXIMUM;
     return ( $title, $message, $maximum, $parent, $style );
 }
 
@@ -89,7 +101,7 @@ sub close {
 sub Update {
     my $self = shift;
     my %args = @_;
-    my $value   = $args{value}   // undef;
+    my $value   = $args{value}   // ($self->value // 0) ;
     my $message = $args{message} // '';
     my $abort = $self->SUPER::Update( $value, $message ) || $self->abort;
     $self->abort($abort);
@@ -98,6 +110,7 @@ sub Update {
 sub setValue {
     my $self = shift;
     my $value = shift;
+    $self->value($value);
     $self->Update(value => $value);
     return 1;
 }
@@ -105,6 +118,7 @@ sub setValue {
 sub setMessage {
     my $self = shift;
     my $message = shift;
+    $self->message($message);
     $self->Update(message => $message);
     return 1;
 }

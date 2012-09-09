@@ -15,11 +15,17 @@ my $progressBar =
 
 usleep (500000);
 
-foreach (1..100) {
+foreach (1..99) {
     $progressBar->setValue($_);
-    usleep (100000)
+    if ($_==30) {
+        $progressBar->setMessage('Phase 2');
+        usleep(1000000);
+    };
+    usleep (10000);
 }
 
 isa_ok($progressBar, 'ECOCODE_Wx::ECProgressDialog' );
+
+$progressBar->close();
 
 done_testing();
