@@ -7,11 +7,30 @@ package ECOCODE_Wx::ECProgressDialog;
 
 =head1 SYNOPSIS
 
+    use Moose ;
+    use ECOCODE_Wx::ECProgressDialog ;
+    use Time::HiRes qw(usleep) ;
 
+    my $progressBar =
+        ECOCODE_Wx::ECProgressDialog->new(
+            parent  => undef,
+            title   => 'Test Progress Bar',
+            message => 'Testing the process bar',
+            maximum => 100,
+        );
+
+    usleep (500000); # Do some stuff
+
+    foreach (1..100) {
+        $progressBar->setValue($_);
+        usleep (100000); # Do some more stuff
+    }
 
 =head1 DESCRIPTION
 
-
+    ECProgressDialog will launch a progressDialog with a
+    progressbar. Subsequent calls to Update will update the
+    progressBar.
 
 =head1 LICENSE
 
