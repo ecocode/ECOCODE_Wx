@@ -110,6 +110,7 @@ sub Update {
 sub setValue {
     my $self = shift;
     my $value = shift;
+    warn "Use close to dismiss the ProgressDialog" if ($value >= $self->maximum);
     $self->value($value);
     $self->Update(value => $value);
     return 1;
