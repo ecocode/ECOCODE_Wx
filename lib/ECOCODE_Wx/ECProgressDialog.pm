@@ -39,64 +39,54 @@ package ECOCODE_Wx::ECProgressDialog;
 
 =cut
 
-use Modern::Perl;
+use strict;
+use warnings;
 
 use Moose;
-use MooseX::NonMoose;
+use MooseX::NonMoose::InsideOut;
 use Log::Log4perl;
 
 extends 'Wx::ProgressDialog';
-use Wx
-    qw(wxID_ANY wxDefaultPosition wxDefaultSize wxPD_AUTO_HIDE wxPD_APP_MODAL );
-use Wx::Event qw( );
+use Wx qw( wxPD_AUTO_HIDE wxPD_APP_MODAL );
 
-use constant _TITLE => '--- EC Progress Dialog ---';
-use constant _MESSAGE => 'Progress';
-
-has 'title' => ( is => 'rw', isa => 'Str', default => _TITLE, );
-has 'mainPanel' => ( is => 'rw', isa => 'Object', );
-has 'panel'     => ( is => 'rw', isa => 'Object', );
-has 'btnOK'     => ( is => 'rw', isa => 'Object', );
-has 'skip'      => ( is => 'rw', isa => 'Bool', default => 0, );
-has 'abort'     => ( is => 'rw', isa => 'Bool', default => 0, );
+has 'abort'     => ( is => 'rw', isa => 'Bool', default => 0 );
 
 sub FOREIGNBUILDARGS {
     my $class  = shift;
     my %args   = @_;
-    my $parent = exists $args{parent} ? $args{parent} : undef;
-    my $title =
-        exists $args{title} ? $args{title} : _TITLE;
-    my $style   = exists $args{style}   ? $args{style}   : undef;
-    my $message = exists $args{message} ? $args{message} : _MESSAGE;
-    my $maximum = $args{maximum} // undef;
+    my $parent = $args{parent} // undef;
+    my $title = $args{title} // '--- ECOCODE_Wx Progress Dialog ---' ;
+    my $style   = $args{style} // (wxPD_AUTO_HIDE | wxPD_APP_MODAL);
+    my $message = $args{message} // 'Progress';
+    my $maximum = $args{maximum} // 100;
     return ( $title, $message, $maximum, $parent, $style );
 }
 
-sub BUILD {
+sub close {
     my $self = shift;
+    $self->Destroy();
 }
 
-sub _Update {
-    my $self     = shift;
-    my %args     = @_;
-    my $value    = $args{value} // undef;
-    my $message  = $args{message} // undef;
-    my $skipRef  = \{ $self->abort };
-    my $abortRef = \{ $self->abort };
-    $$abortRef = !( $self->Update( $value, $message, $skipRef ) ) || $$abortRef;
+sub Update {
+    my $self = shift;
+    my %args = @_;
+    my $value   = $args{value}   // undef;
+    my $message = $args{message} // '';
+    my $abort = $self->SUPER::Update( $value, $message ) || $self->abort;
+    $self->abort($abort);
 }
 
 sub setValue {
     my $self = shift;
     my $value = shift;
-    $self->_Update(value => $value);
+    $self->Update(value => $value);
     return 1;
 }
 
 sub setMessage {
     my $self = shift;
     my $message = shift;
-    $self->_Update(message => $message);
+    $self->Update(message => $message);
     return 1;
 }
 
