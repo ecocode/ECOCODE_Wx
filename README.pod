@@ -1,0 +1,216 @@
+=head1 NAME
+
+ECOCODE_Wx - Moose framework classes around Wx
+
+=head1 VERSION
+
+version
+
+=head1 SYNOPSIS
+
+    package YOUR_APP;
+
+=head1 DESCRIPTION
+
+ECOCODE_Wx is a set of wrapper classes around Wx classes. It's main
+use is to show how to use wxPerl in a Mooseified way.
+
+=head1 INSTALLATION
+
+As of today you can only clone the files from github:
+
+    $ git clone https://github.com/ecocode/ECOCODE_Wx.git
+
+When more classes will be enclosed and some interest arises, I might
+consider uploading the framework to cpan.
+
+Today, you'll need to add the cloned repository to your @INC. This can
+be done with adding the line
+
+    use lib "path_to_ECOCODE_Wx/lib";
+
+=head1 USAGE
+
+Note: The code below has been written fastly _without_ proof running
+it. So it's probably buggy somewhere. Please tell me if so..
+
+Typically you should create a repository with directories layed
+out as follows
+
+    REPO
+      |-- lib                          # put your Wx classes here
+      |     | YOUR_APP.pm              # Wx::app derived class
+      |     | widgets*.pm              # derived widget classes
+      |-- t                            # test files
+      | start.pl                       # the launch file
+
+An application needs a .pl file to be launched. Here's an example of
+such a launch-file:
+
+    # Following lines do show a bitmap (splashscreen) when starting the application
+    my $sc;
+    BEGIN {
+        require Wx::Perl::SplashFast;
+        $sc = Wx::Perl::SplashFast->new('logofile.bmp');
+    }
+
+    # Best practices of Perl
+    use strict;
+    use warnings;
+
+    use Wx;                            # get wxPerl loaded
+    use lib "lib";                     # make your own classes available, located in a 'lib' subdir of your repository
+    use lib "path_to_ECOCODE-Wx/lib";  # make ECOCODE_Wx classes available
+    use YOUR_APP;                      # This should be your Wx::App subclass
+
+    my $app = YOUR_APP->new( ) ;       # Launches your app instance
+
+    $sc->Destroy();                    # remove the splashscreen
+
+    $app->MainLoop;                    # enter the event loop
+
+Once you created the start.pl file, your app will need the YOUR_APP.pm
+file (located in the lib directory)
+
+    package YOUR_APP 0.01;
+
+    use Moose;
+    use MooseX::NonMoose;
+
+    extends 'Wx::App';
+    use Wx qw( :everything );
+    use Wx::Event qw( );
+    use YOUR_APP::MainFrame;
+
+    sub FOREIGNBUILDARGS {
+        my $class = shift;
+        return ();
+    }
+
+    sub BUILD {
+        my $self = shift;
+        my $args = shift;     # this will hold parameters you can send from start.pl in the call to YOUR_APP->new()
+
+        my $frame = YOUR_APP::MainFrame->new();
+        $frame->Show(1);
+        $self->SetTopWindow($frame);
+    }
+
+    sub GetInstance {         # used to call YOUR_APP instance from whereever in the app
+        my $ref = Wx::App::GetInstance();
+        bless $ref, __PACKAGE__;
+        return $ref;
+    }
+
+    no Moose;
+    __PACKAGE__->meta->make_immutable;
+
+    1;
+
+In this example you'll see that the YOUR_APP application is extended
+from Wx::App in a Mooseified way by using FOREIGNBUILD and BUILD
+methods. This is the ugly thing you'll need when you want to mooseify
+classes from wxPerl. That is the code which will be hidden from your
+app when using ECOCODE_Wx wrapper classes. Wx::App is curently not
+mooseified in ECOCODE_Wx though and therefor you still need to do it
+yourself.
+
+This app uses YOUR_APP::MainFrame as the main frame. You need to
+create this Mainframe.pm file in the directory REPO/lib/YOUR_APP/. So
+the file is REPO/lib/YOUR_APP/MainFrame.pm. Here is the code:
+
+    package YOUR_APP::MainFrame;
+
+    use Moose;
+    extends 'ECOCODE_Wx::ECFrame';
+    use Wx::Event qw( EVT_BUTTON );
+
+    has 'butClose' => ( is => 'rw', isa => 'Wx::Button' );
+
+    sub BUILD {
+        my $self = shift;
+        $self->defineWidgets();
+        $self->defineEvents();
+
+        # Organize window widgets with sizers
+        $self->sizers();
+
+    }
+
+    sub close {
+        super;
+        YOUR_APP->GetInstance->ExitMainLoop;
+    }
+
+    sub defineWidgets {
+        my $self = shift;
+        $self->butClose( Wx::Button->new( $self->panel, -1,
+                                          "Close", wxDefaultPosition,
+                                          wxDefaultSize
+                                        )
+                       );
+    }
+
+    sub defineEvents {
+        my $self = shift;
+        super;               # currently ECOCODE_Wx::ECFrame doesn't define Events, but this might be added in future version
+
+        EVT_BUTTON(
+            $self,
+            $self->butClose,
+            sub {
+                my $self = shift;
+                $self->close;
+            }
+        );
+
+    }
+
+    sub sizers {
+        my $self = shift;
+
+        my $tsz = Wx::FlexGridSizer->new( 1, 1, 5, 5 ); # Use a sizer on the frame to layout widgets
+        $self->tsz($tsz);
+
+        $self->tsz->Add($self->butClose);      # Add your widgets on the frame
+
+        $self->panel->SetAutoLayout(1);
+        $self->panel->SetSizer( $self->tsz );
+        $self->tsz->Fit( $self->panel );
+        $self->Maximize(1);                    # Maximize the frame
+        $self->butClose->SetFocus();           # Set focus to the button
+    }
+
+    no Moose;
+    __PACKAGE__->meta->make_immutable;
+
+    1;
+
+Then you can launch the application from within the REPO directory with
+
+    $ perl start.pl
+
+=head1 LICENSE
+
+This file is part of ECOCODE_Wx.
+
+ECOCODE_Wx is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+ECOCODE_Wx is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+
+Copyright 2013 Erik Colson
+
+=head1 AUTHOR
+
+Erik Colson
+
+=cut
