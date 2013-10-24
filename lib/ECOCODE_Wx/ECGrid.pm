@@ -142,8 +142,9 @@ sub defineEventArrows {
                   $self->log->debug($self->nameForLog.": EVT_KEY_DOWN GRID generated");
             my $key = $event->GetKeyCode();
             $self->BeginBatch();
-            given ($key) {
-                when ( $_ == WXK_UP ) {
+          SWITCH:
+            for ($key) {
+                if ( $_ == WXK_UP ) {
 
                     $self->log->debug($self->nameForLog.":  UP pushed");
                     if ( $self->GetGridCursorRow() > 0 ) {
@@ -153,8 +154,9 @@ sub defineEventArrows {
                     else {
                         $event->Skip(0);
                     }
+                    last SWITCH;
                 };
-                when ( $_ == WXK_DOWN ) {
+                if ( $_ == WXK_DOWN ) {
 
                     $self->log->debug($self->nameForLog.":  DOWN pushed");
                     if ( $self->GetGridCursorRow()
@@ -166,8 +168,9 @@ sub defineEventArrows {
                     else {
                         $event->Skip(0);
                     }
+                    last SWITCH;
                 };
-                when ( $_ == WXK_RETURN ) {
+                if ( $_ == WXK_RETURN ) {
 
                     $self->log->debug($self->nameForLog.":  ENTER pushed");
                     $this->HideCellEditControl();
@@ -179,8 +182,9 @@ sub defineEventArrows {
                     else {
                     }
                     $event->Skip(0);
+                    last SWITCH;
                 };
-                when ( $_ == WXK_TAB ) {
+                if ( $_ == WXK_TAB ) {
                     my $keyhandled = 0;
                     $self->log->debug($self->nameForLog.":  TAB pushed");
                     if ( $event->ShiftDown() ) {    # Shift-Tab
@@ -194,8 +198,9 @@ sub defineEventArrows {
                         $keyhandled=1;
                     }
                     $event->Skip(0) if $keyhandled;
+                    last SWITCH;
                 };
-                default { $event->Skip(1) }
+                { $event->Skip(1) } # default
             }
             $self->EndBatch();
         }
