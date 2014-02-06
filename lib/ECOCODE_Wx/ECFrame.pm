@@ -85,12 +85,17 @@ sub BUILD {
     $self->panel( Wx::Panel->new( $self, -1, wxDefaultPosition, wxDefaultSize
                 ));
     $self->setDefaults;
+    $self->defineWidgets;
     $self->defineEvents;
 }
 
 sub setDefaults {
     my $self = shift;
     $self->SetTitle($self->title);
+}
+
+sub defineWidgets {
+    my $self = shift;
 }
 
 sub defineEvents {
