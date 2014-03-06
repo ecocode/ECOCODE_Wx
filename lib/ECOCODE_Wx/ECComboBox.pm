@@ -1,4 +1,4 @@
-package ECOCODE_Wx::ECComboBox;
+package ECOCODE_WX::ECComboBox;
 
 =head1 NAME
 
