@@ -46,7 +46,7 @@ extends 'Wx::TextCtrl';
 
 has 'nameForLog' => ( is => 'rw', isa => 'Str', default => 'ECTextCtrl' );
 has 'log'        => ( is => 'rw', isa => 'Object' );
-has 'wxStaticText' => ( is => 'rw', isa => 'Wx::StaticText' );
+has 'wxStaticText' => ( is => 'rw', isa => 'Maybe[Wx::StaticText]' );
 has 'wxLabel'    => ( is => 'rw', isa => 'Str' );
 
 sub FOREIGNBUILDARGS {
