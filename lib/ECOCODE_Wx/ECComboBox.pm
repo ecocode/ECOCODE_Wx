@@ -61,7 +61,7 @@ sub FOREIGNBUILDARGS {
     my $size = Wx::Size->new( $width, $height );
     my $style     = exists $args{style}     ? $args{style}     : 0;
     my $value     = exists $args{value}     ? $args{value}     : '';
-    my $choices   = exists $args{choices}   ? $args{choices}   : undef;
+    my $choices   = exists $args{choices}   ? $args{choices}   : [];
 
     return ( $parent, $id, $value, $pos, $size, $choices, $style );
 }
