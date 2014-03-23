@@ -1,4 +1,4 @@
-package ECOCODE_WX::ECComboBox;
+package ECOCODE_Wx::ECComboBox;
 
 =head1 NAME
 
@@ -69,6 +69,7 @@ sub FOREIGNBUILDARGS {
 sub BUILD {
     my $self = shift;
     my $args = shift;
+
     $self->log( Log::Log4perl::get_logger( $self->nameForLog ) );
     if ( $args->{label} ) {
         $self->wxStaticText(
