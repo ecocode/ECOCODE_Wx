@@ -1,4 +1,4 @@
-package ECOCODE_WX::ECDataAwareTextCtrl;
+package ECOCODE_Wx::ECDataAwareTextCtrl;
 
 use Moose;
 
