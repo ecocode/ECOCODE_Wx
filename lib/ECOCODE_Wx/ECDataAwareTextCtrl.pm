@@ -20,9 +20,9 @@ sub setToDBICResult {
 
 sub refreshFromDB {
     my $self = shift;
-    if ($self->currentRow()) {
-        my $r = $self->currentRow() ;
-        $self->SetValue($r->get_column($self->dbicColumn));
+    my $r = $self->currentRow() ;
+    if ($r) {
+        $self->SetValue($r->get_column($self->dbicColumn)||'');
     }
 }
 
