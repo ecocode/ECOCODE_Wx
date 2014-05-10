@@ -19,7 +19,7 @@ requires ('close','defineWidgets','defineEvents');
 
 my @buttons = ( [qw/ butFind Find/], [qw/ butClose Close/],
                 [qw/ butNew New/],   [qw/ butDelete Delete/],
-                [qw/ butNext Next/], [qw/ butPrev Previous/],
+                [qw/ butPrev Previous/], [qw/ butNext Next/],
                 [qw/ butSave Save/]
 );
 
@@ -62,8 +62,8 @@ after defineWidgets => sub {
     $boxButtons->Add( $self->butFind );
     $boxButtons->Add( $self->butNew );
     $boxButtons->Add( $self->butDelete );
-    $boxButtons->Add( $self->butNext );
     $boxButtons->Add( $self->butPrev );
+    $boxButtons->Add( $self->butNext );
     $boxButtons->Add( $self->butSave );
     $boxButtons->Add( $self->butClose );
 
@@ -77,8 +77,8 @@ after defineEvents => sub {
                     [ $self->butFind,   \&CRUDFind ],
                     [ $self->butNew,    \&CRUDNew ],
                     [ $self->butDelete, \&CRUDDelete ],
-                    [ $self->butNext,   \&CRUDNext ],
                     [ $self->butPrev,   \&CRUDPrev ],
+                    [ $self->butNext,   \&CRUDNext ],
                     [ $self->butSave,   \&CRUDSave ]
     );
 
