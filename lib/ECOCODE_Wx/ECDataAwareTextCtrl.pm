@@ -30,6 +30,7 @@ sub BUILD {
 sub isChanged {
     my $self = shift;
     my $curValue = $self->GetValue()||'';
+    $curValue =~ s/\r\r/\r\n/g; # on macosx SetValue has changed \r\n in \r\r
     return undef if (!$self->currentRow());
     my $dbValue = $self->currentRow()->get_column($self->dbicColumn)||'';
     return 1 if ($curValue ne $dbValue);
