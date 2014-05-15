@@ -1,30 +1,17 @@
 package ECOCODE_Wx::ECDataAwareTextCtrl;
 
 use Moose;
+use Wx::Event qw( EVT_TEXT );
 
 extends 'ECOCODE_Wx::ECTextCtrl' ;
 
-use DBIx::Class::Row;
-use Wx qw (wxNullColour);
-use Wx::Event qw( EVT_TEXT );
+has 'defaultContent' => ( is => 'ro', isa => 'Str', default=>'' );
 
-has 'dbicColumn' => ( is => 'rw', isa => 'Str', );
-has 'currentRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', );
+with 'ECOCODE_Wx::ECRoleDataAwareWidget';
 
 sub BUILD {
     my ($self,$args) = @_;
-    EVT_TEXT ( $self, $self,
-               sub {
-                   my ($this,$event) = @_;
-                   if ($this->isChanged == 1) {
-                       $this->SetBackgroundColour( Wx::Colour->new('yellow'));
-                       $this->Refresh();
-                   } else {
-                       $this->SetBackgroundColour( wxNullColour );
-                       $this->Refresh();
-                   }
-               }
-           );
+    EVT_TEXT ( $self, $self, sub {shift->colorOnChanged(@_)} );
 }
 
 sub isChanged {
@@ -32,18 +19,9 @@ sub isChanged {
     my $curValue = $self->GetValue()||'';
     $curValue =~ s/\r\r/\r\n/g; # on macosx SetValue has changed \r\n in \r\r
     return undef if (!$self->currentRow());
-    my $dbValue = $self->currentRow()->get_column($self->dbicColumn)||'';
+    my $dbValue = $self->currentRow()->get_column($self->dbicColumn)||$self->defaultContent;
     return 1 if ($curValue ne $dbValue);
     return 0;
-}
-
-sub setToDBICResult {
-    my $self = shift;
-    my %args = @_;
-    if ($args{result}) {
-        $self->currentRow($args{result}) ;
-        $self->refreshFromDB();
-    }
 }
 
 sub refreshFromDB {
