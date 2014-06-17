@@ -45,7 +45,7 @@ use MooseX::NonMoose;
 use Log::Log4perl;
 
 extends 'Wx::MessageDialog';
-use Wx qw(wxID_ANY wxCENTRE wxYES_NO wxCANCEL wxDefaultPosition);
+use Wx qw(wxID_ANY wxCENTRE wxYES_NO wxCANCEL wxOK wxDefaultPosition);
 use Wx::Event qw ();
 
 sub FOREIGNBUILDARGS {
@@ -59,6 +59,7 @@ sub FOREIGNBUILDARGS {
     if ( !defined $args{style} ) {
         $style |= wxYES_NO if $type =~ /YESNO/;
         $style |= wxCANCEL if $type =~ /CANCEL/;
+        $style |= wxOK if $type =~ /OK/;
     }
     return ( $parent, $string, $caption, $style, wxDefaultPosition );
 }
