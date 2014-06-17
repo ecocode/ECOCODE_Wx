@@ -47,6 +47,7 @@ use Wx;
 requires qw( dbc_source ); # DBIx::Class::Source table
 requires qw( panel );
 
+has 'currentDBRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', );
 has 'dataAwareControls' =>
     ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
@@ -132,10 +133,27 @@ sub loadRecord { # loads record info into wx widgets
     return undef if (!$findKey);
 
     my $record = $self->{dbc_source}->resultset->find($findKey);
-    if ($record) {
-        foreach my $ctrl ( @{ $self->dataAwareControls } ) {
-            $ctrl->setToDBICResult( result => $record );
-        }
+
+    return 0 if (!$record);
+
+    $self->currentDBRow( $record );
+    foreach my $ctrl ( @{ $self->dataAwareControls } ) {
+        $ctrl->setToDBICResult( result => $record );
+    }
+}
+
+sub saveRecord { #saves record data to database
+    my $self = shift;
+    my $args = shift;
+
+    my $record = $self->currentDBRow();
+    return 0 if (!$record);
+
+    if (my %changedColumns = $record->get_dirty_columns) {
+        $self->log->debug("Column $_ changed") foreach keys %changedColumns ;
+        $record->update() ; # should be 'eval'ed
+    } else {
+        $self->log->debug("No changes to save");
     }
 }
 

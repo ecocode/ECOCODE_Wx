@@ -14,13 +14,9 @@ sub BUILD {
     EVT_CHECKBOX ( $self, $self, sub {shift->colorOnChanged(@_)} );
 }
 
-sub isChanged {
-    my $self     = shift;
-    my $curValue = $self->GetValue()||0;
-    return undef if ( !$self->currentRow() );
-    my $dbValue = $self->currentRow()->get_column( $self->dbicColumn )||$self->defaultContent;
-    return 1 if ( $curValue != $dbValue );
-    return 0;
+sub _setValue {
+    my ($self,$args) = @_;
+    $self->SetValue($args->{value});
 }
 
 no Moose;
