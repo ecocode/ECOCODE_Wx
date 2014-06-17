@@ -3,7 +3,7 @@ package ECOCODE_Wx::ECRoleCrud;
 use Moose::Role;
 use Wx qw( wxDefaultPosition wxDefaultSize wxTE_PROCESS_ENTER
     wxHORIZONTAL wxEXPAND wxID_OK wxVSCROLL wxWANTS_CHARS wxALWAYS_SHOW_SB
-    wxGROW wxID_ANY wxDEFAULT_FRAME_STYLE );
+    wxGROW wxID_ANY wxDEFAULT_FRAME_STYLE wxALL wxRIGHT );
 use Wx::Event qw( EVT_BUTTON );
 use Log::Log4perl;
 
@@ -59,15 +59,15 @@ after defineWidgets => sub {
 
     my $boxButtons = Wx::BoxSizer->new(wxHORIZONTAL);
 
-    $boxButtons->Add( $self->butFind );
-    $boxButtons->Add( $self->butNew );
-    $boxButtons->Add( $self->butDelete );
-    $boxButtons->Add( $self->butPrev );
-    $boxButtons->Add( $self->butNext );
-    $boxButtons->Add( $self->butSave );
+    $boxButtons->Add( $self->butFind,   1, wxRIGHT, 5 );
+    $boxButtons->Add( $self->butNew,    1, wxRIGHT, 5 );
+    $boxButtons->Add( $self->butDelete, 1, wxRIGHT, 5 );
+    $boxButtons->Add( $self->butPrev,   1, wxRIGHT, 5 );
+    $boxButtons->Add( $self->butNext,   1, wxRIGHT, 5 );
+    $boxButtons->Add( $self->butSave,   1, wxRIGHT, 5 );
     $boxButtons->Add( $self->butClose );
 
-    $self->tsz->Add($boxButtons);
+    $self->tsz->Add( $boxButtons, 1, wxALL, 5 );
 };
 
 after defineEvents => sub {
