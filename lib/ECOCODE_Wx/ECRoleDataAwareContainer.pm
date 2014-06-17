@@ -149,6 +149,13 @@ sub saveRecord { #saves record data to database
     my $record = $self->currentDBRow();
     return 0 if (!$record);
 
+    # put changes in $record
+    foreach my $ctrl ( @{ $self->dataAwareControls } ) {
+        if ($ctrl->isChanged) {
+            $record->set_column($ctrl->dbicColumn => $ctrl->GetValue) ;
+        }
+    }
+
     if (my %changedColumns = $record->get_dirty_columns) {
         $self->log->debug("Column $_ changed") foreach keys %changedColumns ;
         $record->update() ; # should be 'eval'ed
