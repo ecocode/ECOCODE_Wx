@@ -92,6 +92,7 @@ sub refreshFromDB {
         );
         $self->dbValue( $self->GetValue() );
         $self->SetBackgroundColour(wxNullColour);
+        $self->Refresh;
     }
 }
 

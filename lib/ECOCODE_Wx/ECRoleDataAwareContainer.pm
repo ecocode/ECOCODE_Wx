@@ -163,6 +163,7 @@ sub saveRecord {    #saves record data to database
     if ( my %changedColumns = $record->get_dirty_columns ) {
         $self->log->debug("Column $_ changed") foreach keys %changedColumns;
         $record->update();    # should be 'eval'ed
+        $_->refreshFromDB() foreach ( @{ $self->dataAwareControls } );
     }
     else {
         $self->log->debug("No changes to save");
