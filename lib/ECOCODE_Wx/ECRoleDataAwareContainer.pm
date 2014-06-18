@@ -44,7 +44,7 @@ use Moose::Role;
 use Log::Log4perl;
 use Wx;
 
-requires qw( dbc_source ); # DBIx::Class::Source table
+requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
 
 has 'currentDBRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', );
@@ -59,29 +59,33 @@ sub getNewBoxWithDAWidgets {
     my $self = shift;
     my $args = shift;
 
-    return if (!$args->{fields});
+    return if ( !$args->{fields} );
 
     # my $boxData = $args->{containerBox} if ($args->{containerBox});
-    my $boxData = Wx::FlexGridSizer->new(undef,2,5,5); # 2 columns
+    my $boxData = Wx::FlexGridSizer->new( undef, 2, 5, 5 );    # 2 columns
 
-    my @fields = @{$args->{fields}};
+    my @fields = @{ $args->{fields} };
 
-    foreach my $field ( @fields ) {
+    foreach my $field (@fields) {
         my $dbicColumn = $field->{dbicColumn};
         my $columnInfo = $self->dbc_source->column_info($dbicColumn);
         my $ctrl;
 
         # TODO ### CONTINUE HERE
-        if ($columnInfo->{is_boolean}) {
+        if ( $columnInfo->{is_boolean} ) {
+
             #create a checkbox
-            $ctrl = $self->generateWidgetCheckBox({field=>$field,columnInfo=>$columnInfo});
+            $ctrl = $self->generateWidgetCheckBox(
+                               { field => $field, columnInfo => $columnInfo } );
             if ($ctrl) {
-                $boxData->Add( undef );
-                $boxData->Add( $ctrl );
+                $boxData->Add(undef);
+                $boxData->Add($ctrl);
             }
-        } else {
+        }
+        else {
             # create a textcontrol
-            $ctrl = $self->generateWidgetTextCtrl({field=>$field,columnInfo=>$columnInfo});
+            $ctrl = $self->generateWidgetTextCtrl(
+                               { field => $field, columnInfo => $columnInfo } );
             if ($ctrl) {
                 $boxData->Add( $ctrl->wxStaticText );
                 $boxData->Add($ctrl);
@@ -93,73 +97,74 @@ sub getNewBoxWithDAWidgets {
 }
 
 sub generateWidgetCheckBox {
-    my $self = shift;
-    my $args = shift;
+    my $self  = shift;
+    my $args  = shift;
     my $field = $args->{field};
-    return undef if (!$field);
+    return undef if ( !$field );
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
     my $ctrl = $DACheckBox->new(
-        parent     => $self->panel,
-        label      => $wx_label,
-        width      => -1,
-        dbicColumn => $field->{dbicColumn},
-        style => ( exists( $field->{style} ) ? $field->{style} : 0 ),
+                   parent     => $self->panel,
+                   label      => $wx_label,
+                   width      => -1,
+                   dbicColumn => $field->{dbicColumn},
+                   style => ( exists( $field->{style} ) ? $field->{style} : 0 ),
     );
     return $ctrl // undef;
 }
 
 sub generateWidgetTextCtrl {
-    my $self = shift;
-    my $args = shift;
+    my $self  = shift;
+    my $args  = shift;
     my $field = $args->{field};
-    return undef if (!$field);
+    return undef if ( !$field );
     my $wx_width = $field->{wx_width} // $args->{columnInfo}->{wx_width} // -1;
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
     my $ctrl = $DATextCtrl->new(
-        parent     => $self->panel,
-        label      => $wx_label,
-        width      => $wx_width,
-        dbicColumn => $field->{dbicColumn},
-        style => ( exists( $field->{style} ) ? $field->{style} : 0 ),
+                   parent     => $self->panel,
+                   label      => $wx_label,
+                   width      => $wx_width,
+                   dbicColumn => $field->{dbicColumn},
+                   style => ( exists( $field->{style} ) ? $field->{style} : 0 ),
     );
     return $ctrl // undef;
 }
 
-sub loadRecord { # loads record info into wx widgets
+sub loadRecord {    # loads record info into wx widgets
     my $self = shift;
     my $args = shift;
 
-    my $findKey = $args->{findKey}; # findKey is the content of the primary key
-    return undef if (!$findKey);
+    my $findKey = $args->{findKey};  # findKey is the content of the primary key
+    return undef if ( !$findKey );
 
     my $record = $self->{dbc_source}->resultset->find($findKey);
 
-    return 0 if (!$record);
+    return 0 if ( !$record );
 
-    $self->currentDBRow( $record );
+    $self->currentDBRow($record);
     foreach my $ctrl ( @{ $self->dataAwareControls } ) {
         $ctrl->setToDBICResult( result => $record );
     }
 }
 
-sub saveRecord { #saves record data to database
+sub saveRecord {    #saves record data to database
     my $self = shift;
     my $args = shift;
 
     my $record = $self->currentDBRow();
-    return 0 if (!$record);
+    return 0 if ( !$record );
 
     # put changes in $record
     foreach my $ctrl ( @{ $self->dataAwareControls } ) {
-        if ($ctrl->isChanged) {
-            $record->set_column($ctrl->dbicColumn => $ctrl->GetValue) ;
+        if ( $ctrl->isChanged ) {
+            $record->set_column( $ctrl->dbicColumn => $ctrl->GetValue );
         }
     }
 
-    if (my %changedColumns = $record->get_dirty_columns) {
-        $self->log->debug("Column $_ changed") foreach keys %changedColumns ;
-        $record->update() ; # should be 'eval'ed
-    } else {
+    if ( my %changedColumns = $record->get_dirty_columns ) {
+        $self->log->debug("Column $_ changed") foreach keys %changedColumns;
+        $record->update();    # should be 'eval'ed
+    }
+    else {
         $self->log->debug("No changes to save");
     }
 }
