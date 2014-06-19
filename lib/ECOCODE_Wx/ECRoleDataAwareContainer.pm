@@ -42,7 +42,7 @@ use warnings;
 
 use Moose::Role;
 use Log::Log4perl;
-use Wx;
+use Wx qw( wxID_YES );
 use ECOCODE_Wx::ECMessageDialog;
 
 requires qw( dbc_source );    # DBIx::Class::Source table
@@ -195,10 +195,12 @@ sub deleteRecord { # deletes the record from database
         ECOCODE_Wx::ECMessageDialog->new(caption=>"Can't delete - relations exist:",string=>$message,type=>'OK')->ShowModal;
         return 0;
     }
-    $record->delete();
-    ECOCODE_Wx::ECMessageDialog->new(caption=>"Record deleted",string=>'',type=>'OK')->ShowModal;
-    $self->newRecord();
-    # $self->_refreshControlsFromDB;
+    my $dialog_save = ECOCODE_Wx::ECMessageDialog->new(caption=>"Delete record",string=>"Are you sure",type=>'YESNO');
+    if ($dialog_save->ShowModal() == wxID_YES) {
+        $record->delete();
+        ECOCODE_Wx::ECMessageDialog->new(caption=>"Record deleted",string=>'',type=>'OK')->ShowModal;
+        $self->newRecord();
+    }
 }
 
 sub _refreshControlsFromDB {
