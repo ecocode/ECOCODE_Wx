@@ -47,7 +47,7 @@ use Wx;
 requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
 
-has 'currentDBRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', );
+has 'currentDBRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', trigger=>\&_setCtrlRow );
 has 'dataAwareControls' =>
     ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
@@ -162,12 +162,32 @@ sub saveRecord {    #saves record data to database
 
     if ( my %changedColumns = $record->get_dirty_columns ) {
         $self->log->debug("Column $_ changed") foreach keys %changedColumns;
-        $record->update();    # should be 'eval'ed
-        $_->refreshFromDB() foreach ( @{ $self->dataAwareControls } );
+        $record->update_or_insert();    # should be 'eval'ed
+        $self->_refreshControlsFromDB;
     }
     else {
         $self->log->debug("No changes to save");
     }
+}
+
+sub _refreshControlsFromDB {
+    my $self = shift;
+
+    $_->refreshFromDB foreach ( @{ $self->dataAwareControls } );
+}
+
+sub _setCtrlRow { # update Rows in dataAware widgets
+    my ( $self, $row, $old_row ) = @_;
+    $_->currentRow($row) foreach ( @{ $self->dataAwareControls } );
+}
+
+sub newRecord { # create an empty record WITHOUT inserting into database
+    my $self = shift;
+
+    my $record = $self->dbc_source->resultset()->new_result({});
+    $self->currentDBRow($record);
+    $self->_refreshControlsFromDB;
+    return $record;
 }
 
 no Moose::Role;

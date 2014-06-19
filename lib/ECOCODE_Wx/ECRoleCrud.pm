@@ -13,7 +13,7 @@ requires ('panel', # associated Wx::Panel
           'log', # Log::Log4Perl
       ) ;
 # required functions
-requires ('close','defineWidgets','defineEvents');
+requires ('close','defineWidgets','defineEvents','newRecord','saveRecord');
 
 # define attributes
 
@@ -101,9 +101,11 @@ sub CRUDClose {
 }
 sub CRUDNew {
     my $self = shift;
+    $self->newRecord();
 }
 sub CRUDSave {
     my $self = shift;
+    $self->saveRecord();
 }
 sub CRUDPrev {
     my $self = shift;
