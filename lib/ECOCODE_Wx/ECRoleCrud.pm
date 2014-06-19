@@ -13,7 +13,7 @@ requires ('panel', # associated Wx::Panel
           'log', # Log::Log4Perl
       ) ;
 # required functions
-requires ('close','defineWidgets','defineEvents','newRecord','saveRecord');
+requires ('close','defineWidgets','defineEvents','newRecord','saveRecord','deleteRecord');
 
 # define attributes
 
@@ -118,6 +118,7 @@ sub CRUDFind {
 }
 sub CRUDDelete {
     my $self = shift;
+    $self->deleteRecord();
 }
 
 

@@ -43,6 +43,7 @@ use warnings;
 use Moose::Role;
 use Log::Log4perl;
 use Wx;
+use ECOCODE_Wx::ECMessageDialog;
 
 requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
@@ -168,6 +169,36 @@ sub saveRecord {    #saves record data to database
     else {
         $self->log->debug("No changes to save");
     }
+}
+
+sub deleteRecord { # deletes the record from database
+    my $self =shift;
+
+    my $record = $self->currentDBRow();
+    return 0 if ( !$record );
+
+    return 0 if ( !$record->in_storage() );
+
+    my @relations = $self->dbc_source->relationships();
+    my @linkedRecords;
+    foreach my $relation (@relations) {
+        my $relationData = $self->dbc_source->relationship_info($relation);
+        my $type = $relationData->{attrs}{accessor};
+        if ($type eq 'multi') {
+            my $count = $record->related_resultset($relation)->count();
+            push @linkedRecords, "$count in relation $relation" if ($count);
+        }
+    }
+
+    if (@linkedRecords) {
+        my $message = join("\n",@linkedRecords);
+        ECOCODE_Wx::ECMessageDialog->new(caption=>"Can't delete - relations exist:",string=>$message,type=>'OK')->ShowModal;
+        return 0;
+    }
+    $record->delete();
+    ECOCODE_Wx::ECMessageDialog->new(caption=>"Record deleted",string=>'',type=>'OK')->ShowModal;
+    $self->newRecord();
+    # $self->_refreshControlsFromDB;
 }
 
 sub _refreshControlsFromDB {
