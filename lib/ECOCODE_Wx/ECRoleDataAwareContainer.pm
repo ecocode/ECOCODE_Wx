@@ -48,7 +48,8 @@ use ECOCODE_Wx::ECMessageDialog;
 requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
 
-has 'currentDBRow' => ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', trigger=>\&_setCtrlRow );
+has 'currentDBRow' =>
+    ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', trigger => \&_setCtrlRow );
 has 'dataAwareControls' =>
     ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
@@ -170,8 +171,8 @@ sub saveRecord {    #saves record data to database
     }
 }
 
-sub deleteRecord { # deletes the record from database
-    my $self =shift;
+sub deleteRecord {                      # deletes the record from database
+    my $self = shift;
 
     my $record = $self->currentDBRow();
     return 0 if ( !$record );
@@ -182,22 +183,33 @@ sub deleteRecord { # deletes the record from database
     my @linkedRecords;
     foreach my $relation (@relations) {
         my $relationData = $self->dbc_source->relationship_info($relation);
-        my $type = $relationData->{attrs}{accessor};
-        if ($type eq 'multi') {
+        my $type         = $relationData->{attrs}{accessor};
+        if ( $type eq 'multi' ) {
             my $count = $record->related_resultset($relation)->count();
             push @linkedRecords, "$count in relation $relation" if ($count);
         }
     }
 
     if (@linkedRecords) {
-        my $message = join("\n",@linkedRecords);
-        ECOCODE_Wx::ECMessageDialog->new(caption=>"Can't delete - relations exist:",string=>$message,type=>'OK')->ShowModal;
+        my $message = join( "\n", @linkedRecords );
+        ECOCODE_Wx::ECMessageDialog->new(
+                                   caption => "Can't delete - relations exist:",
+                                   string  => $message,
+                                   type    => 'OK'
+        )->ShowModal;
         return 0;
     }
-    my $dialog_save = ECOCODE_Wx::ECMessageDialog->new(caption=>"Delete record",string=>"Are you sure",type=>'YESNO');
-    if ($dialog_save->ShowModal() == wxID_YES) {
+    my $dialog_save =
+        ECOCODE_Wx::ECMessageDialog->new( caption => "Delete record",
+                                          string  => "Are you sure",
+                                          type    => 'YESNO'
+        );
+    if ( $dialog_save->ShowModal() == wxID_YES ) {
         $record->delete();
-        ECOCODE_Wx::ECMessageDialog->new(caption=>"Record deleted",string=>'',type=>'OK')->ShowModal;
+        ECOCODE_Wx::ECMessageDialog->new( caption => "Record deleted",
+                                          string  => '',
+                                          type    => 'OK'
+        )->ShowModal;
         $self->newRecord();
     }
 }
@@ -208,15 +220,15 @@ sub _refreshControlsFromDB {
     $_->refreshFromDB foreach ( @{ $self->dataAwareControls } );
 }
 
-sub _setCtrlRow { # update Rows in dataAware widgets
+sub _setCtrlRow {    # update Rows in dataAware widgets
     my ( $self, $row, $old_row ) = @_;
     $_->currentRow($row) foreach ( @{ $self->dataAwareControls } );
 }
 
-sub newRecord { # create an empty record WITHOUT inserting into database
+sub newRecord {      # create an empty record WITHOUT inserting into database
     my $self = shift;
 
-    my $record = $self->dbc_source->resultset()->new_result({});
+    my $record = $self->dbc_source->resultset()->new_result( {} );
     $self->currentDBRow($record);
     $self->_refreshControlsFromDB;
     return $record;
