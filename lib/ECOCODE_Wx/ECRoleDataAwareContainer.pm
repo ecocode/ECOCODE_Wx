@@ -62,7 +62,6 @@ sub getNewBoxWithDAWidgets {
 
     return if ( !$args->{fields} );
 
-    # my $boxData = $args->{containerBox} if ($args->{containerBox});
     my $boxData = Wx::FlexGridSizer->new( undef, 2, 5, 5 );    # 2 columns
 
     my @fields = @{ $args->{fields} };
