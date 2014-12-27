@@ -85,8 +85,9 @@ sub FOREIGNBUILDARGS {
 sub BUILD {
     my $self = shift;
     my $args = shift;
-    $self->log(Log::Log4perl->get_logger($self->nameForLog));
-    $self->log->debug($self->nameForLog.": Parent should be defined") if (!$args->{parent});
+    $self->log( Log::Log4perl->get_logger( $self->nameForLog ) );
+    $self->log->debug( $self->nameForLog . ": Parent should be defined" )
+        if ( !$args->{parent} );
 
     $self->setDefaults;
     $self->defineEventArrows;
@@ -102,7 +103,7 @@ sub setNextControl {
     $self->nextControl($nextControl);
 }
 
-sub setDefaults { ### LOTS OF THESE SHOULD BE CLASS VARIABLES !!!
+sub setDefaults {    ### LOTS OF THESE SHOULD BE CLASS VARIABLES !!!
     my $self = shift;
 
     $self->bgColourNotEdit( Wx::Colour->new( 230, 230, 230 ) );
@@ -225,18 +226,19 @@ sub defineEventArrows {
         $self,
         sub {
             my ( $this, $event ) = @_;
-            $self->log->debug($self->nameForLog.": EVT_KILL_FOCUS");
+            $self->log->debug( $self->nameForLog . ": EVT_KILL_FOCUS" );
             if ( $this->IsCellEditControlEnabled() ) {
-
-                $self->log->debug($self->nameForLog.": GRID KNOWS A CELLEDITOR IS ENABLED");
+                $self->log->debug( $self->nameForLog
+                                   . ": GRID KNOWS A CELLEDITOR IS ENABLED" );
             }
             else {
-
-                $self->log->debug($self->nameForLog.": GRID THINKS THERE IS NO CELLEDITOR ENABLED");
+                $self->log->debug( $self->nameForLog
+                             . ": GRID THINKS THERE IS NO CELLEDITOR ENABLED" );
                 $self->unHighlightRow();    #  $this->GetGridCursorRow()
             }
             $event->Skip(1);
-        }
+            }
+
     );
 
     EVT_ACTIVATE( # NOT USED
@@ -260,12 +262,14 @@ sub defineEventArrows {
     EVT_GRID_SELECT_CELL(
         $self,
         sub {
-            my ( $this, $event) = @_;
+            my ( $this, $event ) = @_;
             my $gridRow = $event->GetRow();
-            $self->log->debug($self->nameForLog.": EVT_GRID_SELECT_CELL called on row $gridRow");
-            $this->highlightRow( $gridRow );
+            $self->log->debug( $self->nameForLog
+                            . ": EVT_GRID_SELECT_CELL called on row $gridRow" );
+            $this->highlightRow($gridRow);
             $event->Skip(1);
-        }
+            }
+
     );
 }
 
@@ -275,16 +279,18 @@ sub highlightRow {
     if ( defined($newRow) ) {
         $self->SetRowAttr( $newRow, $self->attrCurLine );
 
-       $self->log->debug($self->nameForLog.": SHOWING Row $newRow") ;
+        $self->log->debug( $self->nameForLog . ": SHOWING Row $newRow" );
     }
 
-# is this part working ? unhighlight the current highlighted row if it is not the same
+    # is this part working ?
+    # unhighlight the current highlighted row if it is not the same
     if ( defined( $self->currentHighlightedRow )
          && ( $self->currentHighlightedRow != $newRow )
         )    # be sure we don't unhl the row we need highlight!
     {
-
-        $self->log->debug( $self->nameForLog.": AUTOHIDE row " . $self->currentHighlightedRow );
+        $self->log->debug(   $self->nameForLog
+                           . ": AUTOHIDE row "
+                           . $self->currentHighlightedRow );
         $self->unHighlightRow( $self->currentHighlightedRow );
     }
     $self->currentHighlightedRow($newRow);
@@ -295,7 +301,7 @@ sub highlightRow {
 sub addOneRow {
     my $self = shift;
     $self->AppendRows(1);
-    my $rowNumber = $self->GetNumberRows()-1;
+    my $rowNumber = $self->GetNumberRows() - 1;
     $self->unHighlightRow($rowNumber);
     return $rowNumber;
 }
@@ -305,10 +311,10 @@ sub unHighlightRow {
 
     $row = ( defined( $self->currentHighlightedRow )
              ? $self->currentHighlightedRow
-             : $self->GetGridCursorRow() )
-        if ( !defined($row) );
+             : $self->GetGridCursorRow()
+    ) if ( !defined($row) );
 
-    $self->log->debug($self->nameForLog.": HIDING Row $row");
+    $self->log->debug( $self->nameForLog . ": HIDING Row $row" );
     $self->SetRowAttr( $row, $self->attrNotCurLine );
     $self->currentHighlightedRow(undef);
     $self->Refresh();
