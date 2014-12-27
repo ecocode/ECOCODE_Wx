@@ -52,7 +52,7 @@ use Wx::Event
        EVT_GRID_SELECT_CELL EVT_ACTIVATE EVT_CHILD_FOCUS);
 
 has 'nameForLog' => ( is => 'rw', isa => 'Str', default => 'ECGrid' );
-has 'log' => ( is => 'rw', isa => 'Object' );
+has 'log' => ( is => 'rw', isa => 'Maybe[Log::Log4perl::Logger]', );
 has 'bgColourNotEdit' => ( is => 'rw', isa => 'Object' );
 has 'attrNotEdit'     => ( is => 'rw', isa => 'Object' );
 has 'bgColourEdit'    => ( is => 'rw', isa => 'Object' );
