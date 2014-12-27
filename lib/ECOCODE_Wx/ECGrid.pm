@@ -84,7 +84,9 @@ sub FOREIGNBUILDARGS {
 
 sub BUILD {
     my $self = shift;
+    my $args = shift;
     $self->log(Log::Log4perl->get_logger($self->nameForLog));
+    $self->log->debug($self->nameForLog.": Parent should be defined") if (!$args->{parent});
 
     $self->setDefaults;
     $self->defineEventArrows;
