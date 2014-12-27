@@ -292,6 +292,14 @@ sub highlightRow {
     $self->Refresh();
 }
 
+sub addOneRow {
+    my $self = shift;
+    $self->AppendRows(1);
+    my $rowNumber = $self->GetNumberRows()-1;
+    $self->unHighlightRow($rowNumber);
+    return $rowNumber;
+}
+
 sub unHighlightRow {
     my ( $self, $row ) = @_;
 
