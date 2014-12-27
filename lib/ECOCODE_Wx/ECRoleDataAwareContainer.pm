@@ -42,8 +42,9 @@ use warnings;
 
 use Moose::Role;
 use Log::Log4perl;
-use Wx qw( wxID_YES );
+use Wx qw( wxID_YES wxEXPAND wxALL );
 use ECOCODE_Wx::ECMessageDialog;
+use ECOCODE_Wx::ECBrowse;
 
 requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
@@ -52,18 +53,53 @@ has 'currentDBRow' =>
     ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', trigger => \&_setCtrlRow );
 has 'dataAwareControls' =>
     ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
+has 'dataAwareGridControls' =>   # these are _not_ auto-updated !
+    ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
 use aliased;
 my $DATextCtrl = alias 'ECOCODE_Wx::ECDataAwareTextCtrl';
 my $DACheckBox = alias 'ECOCODE_Wx::ECDataAwareCheckBox';
+
+sub getNewBoxWithDAGrid {
+    # returns a Box with a Grid and data aware info
+    # currently NOT editable
+    # also returns the grid to allow updating it.
+
+    my $self = shift;
+    my %args = @_;
+
+#    return if (!$args->{resultSource});
+
+    my $parent = $args{parent} // $self->panel;
+    my $columns = $args{columns} ;
+    my $rs = $args{resultSource} // undef;
+
+    my $boxData = Wx::FlexGridSizer->new( 0, 1, 5, 5 );    # 1 column
+
+    # create a grid type ECBrowse based on ECGrid and make it DataAware
+    # Insert the grid in the $boxData
+
+    my $browseGrid = ECOCODE_Wx::ECBrowse->new( parent=>$parent,
+                                                resultSource=>$rs,
+                                                columns=>$columns );
+
+    $boxData->Add( $browseGrid, 1, wxEXPAND|wxALL, 5 );
+    $boxData->AddGrowableCol(0);
+    $boxData->AddGrowableRow(0);
+
+    push @{ $self->dataAwareGridControls }, $browseGrid if ($browseGrid);
+
+    return ($boxData,$browseGrid);
+}
 
 sub getNewBoxWithDAWidgets {
     my $self = shift;
     my $args = shift;
 
     return if ( !$args->{fields} );
+    my $parent = $args->{parent} // $self->panel;
 
-    my $boxData = Wx::FlexGridSizer->new( undef, 2, 5, 5 );    # 2 columns
+    my $boxData = Wx::FlexGridSizer->new( 0, 2, 5, 5 );    # 2 columns
 
     my @fields = @{ $args->{fields} };
 
@@ -77,7 +113,7 @@ sub getNewBoxWithDAWidgets {
 
             #create a checkbox
             $ctrl = $self->generateWidgetCheckBox(
-                               { field => $field, columnInfo => $columnInfo } );
+                               { parent => $parent, field => $field, columnInfo => $columnInfo } );
             if ($ctrl) {
                 $boxData->Add(undef);
                 $boxData->Add($ctrl);
@@ -86,7 +122,7 @@ sub getNewBoxWithDAWidgets {
         else {
             # create a textcontrol
             $ctrl = $self->generateWidgetTextCtrl(
-                               { field => $field, columnInfo => $columnInfo } );
+                               { parent => $parent, field => $field, columnInfo => $columnInfo } );
             if ($ctrl) {
                 $boxData->Add( $ctrl->wxStaticText );
                 $boxData->Add($ctrl);
@@ -104,7 +140,7 @@ sub generateWidgetCheckBox {
     return undef if ( !$field );
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
     my $ctrl = $DACheckBox->new(
-                   parent     => $self->panel,
+                   parent     => $args->{parent} // $self->panel,
                    label      => $wx_label,
                    width      => -1,
                    dbicColumn => $field->{dbicColumn},
@@ -121,7 +157,7 @@ sub generateWidgetTextCtrl {
     my $wx_width = $field->{wx_width} // $args->{columnInfo}->{wx_width} // -1;
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
     my $ctrl = $DATextCtrl->new(
-                   parent     => $self->panel,
+                   parent     => $args->{parent} // $self->panel,
                    label      => $wx_label,
                    width      => $wx_width,
                    dbicColumn => $field->{dbicColumn},
