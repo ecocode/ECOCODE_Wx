@@ -29,7 +29,7 @@ package ECOCODE_Wx::ECGrid;
     You should have received a copy of the GNU General Public License
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright 2012 Erik Colson
+    Copyright 2012-2014 Erik Colson
 
 =head1 AUTHOR
 
