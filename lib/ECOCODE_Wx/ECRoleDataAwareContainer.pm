@@ -45,6 +45,7 @@ use Log::Log4perl;
 use Wx qw( wxID_YES wxEXPAND wxALL );
 use ECOCODE_Wx::ECMessageDialog;
 use ECOCODE_Wx::ECBrowse;
+use Wx::Perl::TextValidator;
 
 requires qw( dbc_source );    # DBIx::Class::Source table
 requires qw( panel );
@@ -156,12 +157,15 @@ sub generateWidgetTextCtrl {
     return undef if ( !$field );
     my $wx_width = $field->{wx_width} // $args->{columnInfo}->{wx_width} // -1;
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
+    my $validator = $field->{wx_validator} // $args->{columnInfo}->{wx_validator} // undef;
+
     my $ctrl = $DATextCtrl->new(
                    parent     => $args->{parent} // $self->panel,
                    label      => $wx_label,
                    width      => $wx_width,
                    dbicColumn => $field->{dbicColumn},
                    style => ( exists( $field->{style} ) ? $field->{style} : 0 ),
+                   validator => $validator,
     );
     return $ctrl // undef;
 }

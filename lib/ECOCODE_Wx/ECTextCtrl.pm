@@ -41,6 +41,7 @@ use Moose;
 use MooseX::NonMoose;
 use Log::Log4perl;
 use Wx qw( wxID_ANY wxDefaultPosition wxDefaultSize );
+use Wx::Perl::TextValidator;
 
 extends 'Wx::TextCtrl';
 
@@ -61,8 +62,16 @@ sub FOREIGNBUILDARGS {
     my $size = Wx::Size->new( $width, $height );
     my $style     = exists $args{style}     ? $args{style}     : 0;
     my $value     = exists $args{value}     ? $args{value}     : '';
+    my $validator =
+        defined ($args{validator})
+        ? Wx::Perl::TextValidator->new( $args{validator} )
+        : undef;
+    use DDP;
+    p $validator;
+    my @return = ($parent, $id, $value, $pos, $size, $style);
+    push @return, $validator if $validator;
 
-    return ( $parent, $id, $value, $pos, $size, $style );
+    return ( @return );
 }
 
 sub BUILD {
