@@ -55,10 +55,14 @@ sub BUILD {
     my $args = shift;
 
     my @columns = @{$self->columns};
+    my $rs = $args->{resultSource};
     $self->CreateGrid(0,scalar @columns);
     $self->HideRowLabels;
     foreach (0.. $#columns) {
-        $self->SetColLabelValue($_, $columns[$_]);
+        my $colname = $columns[$_];
+        my $colinfo = $rs->column_info($colname);
+        $self->SetColLabelValue($_, $colinfo->{wx_label} // $columns[$_]);
+        $self->SetColSize($_,$colinfo->{wx_width}) if ($colinfo->{wx_width});
         $self->setColumnNotEdit($_);
         # TODO: set width to values from resultsource
     }
