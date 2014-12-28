@@ -159,6 +159,13 @@ sub generateWidgetTextCtrl {
     my $wx_label = $field->{wx_label} // $args->{columnInfo}->{wx_label} // '';
     my $validator = $field->{wx_validator} // $args->{columnInfo}->{wx_validator} // undef;
 
+    if (!$validator) { # there is no defined validator, create our own for some types
+        my $colInfo = $args->{columnInfo};
+        if ($colInfo->{is_numeric}) {
+            $validator = qr/[0-9\.]/;
+        }
+    }
+
     my $ctrl = $DATextCtrl->new(
                    parent     => $args->{parent} // $self->panel,
                    label      => $wx_label,
