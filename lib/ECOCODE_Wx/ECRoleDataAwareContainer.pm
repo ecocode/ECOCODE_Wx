@@ -211,6 +211,7 @@ sub saveRecord {    #saves record data to database
     if ( my %changedColumns = $record->get_dirty_columns ) {
         $self->log->debug("Column $_ changed") foreach keys %changedColumns;
         $record->update_or_insert();    # should be 'eval'ed
+        $record->discard_changes();  # refresh from database
         $self->_refreshControlsFromDB;
     }
     else {
