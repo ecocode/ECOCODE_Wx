@@ -1,5 +1,7 @@
 package ECOCODE_Wx::ECGrid;
 
+# ABSTRACT: Moose class around a customized Wx Grid
+
 =head1 NAME
 
     ECGrid - Moose class around a customized Wx Grid
