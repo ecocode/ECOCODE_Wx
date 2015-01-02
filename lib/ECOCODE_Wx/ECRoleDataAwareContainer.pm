@@ -53,7 +53,7 @@ requires qw( panel );
 has 'currentDBRow' =>
     ( is => 'rw', isa => 'Maybe[DBIx::Class::Row]', trigger => \&_setCtrlRow );
 has 'dataAwareControls' =>
-    ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
+    ( is => 'rw', isa => 'HashRef', default => sub { {} } );
 has 'dataAwareGridControls' =>   # these are _not_ auto-updated !
     ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 
@@ -129,7 +129,7 @@ sub getNewBoxWithDAWidgets {
                 $boxData->Add($ctrl);
             }
         }
-        push @{ $self->dataAwareControls }, $ctrl if ($ctrl);
+        $self->dataAwareControls->{$field->{ctrl}}=$ctrl;
     }
     return $boxData;
 }
@@ -189,7 +189,7 @@ sub loadRecord {    # loads record info into wx widgets
     return 0 if ( !$record );
 
     $self->currentDBRow($record);
-    foreach my $ctrl ( @{ $self->dataAwareControls } ) {
+    foreach my $ctrl ( values %{$self->dataAwareControls}) {
         $ctrl->setToDBICResult( result => $record );
     }
 }
@@ -202,7 +202,7 @@ sub saveRecord {    #saves record data to database
     return 0 if ( !$record );
 
     # put changes in $record
-    foreach my $ctrl ( @{ $self->dataAwareControls } ) {
+    foreach my $ctrl ( values %{$self->dataAwareControls}) {
         if ( $ctrl->isChanged ) {
             $record->set_column( $ctrl->dbicColumn => $ctrl->GetValue );
         }
@@ -265,12 +265,12 @@ sub deleteRecord {                      # deletes the record from database
 sub _refreshControlsFromDB {
     my $self = shift;
 
-    $_->refreshFromDB foreach ( @{ $self->dataAwareControls } );
+    $_->refreshFromDB foreach ( values %{ $self->dataAwareControls } );
 }
 
 sub _setCtrlRow {    # update Rows in dataAware widgets
     my ( $self, $row, $old_row ) = @_;
-    $_->currentRow($row) foreach ( @{ $self->dataAwareControls } );
+    $_->currentRow($row) foreach ( values %{ $self->dataAwareControls } );
 }
 
 sub newRecord {      # create an empty record WITHOUT inserting into database
