@@ -162,7 +162,7 @@ sub generateWidgetTextCtrl {
     if (!$validator) { # there is no defined validator, create our own for some types
         my $colInfo = $args->{columnInfo};
         if ($colInfo->{is_numeric}) {
-            $validator = qr/[0-9\.]/;
+            $validator = qr/[-0-9\.]/;
         }
     }
 
